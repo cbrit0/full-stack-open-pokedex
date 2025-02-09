@@ -34,6 +34,29 @@ jobs:
       - run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Notify Discord on Success
+        uses: rjstone/discord-webhook-notify@v1.0.4
+        if: success()
+        with:
+          severity: info
+          username: GitHub
+          avatarUrl: https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png
+          text: A new version of pokedex deployed
+          description: 🚀 **Build Success!** A new version has been deployed.
+          details: 'at https://full-stack-open-pokedex-purple-haze-5183.fly.dev/'
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Notify Discord on Failure
+        uses: rjstone/discord-webhook-notify@v1.0.4
+        if: failure()
+        with:
+          severity: error
+          username: GitHub
+          avatarUrl: https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png
+          text: Build failed
+          description: '❌ Commit: ${{ github.sha }}. Check the logs for more details.'
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
   
   tag_release:
     if: ${{ github.env.CONDITION == 'true' }}
